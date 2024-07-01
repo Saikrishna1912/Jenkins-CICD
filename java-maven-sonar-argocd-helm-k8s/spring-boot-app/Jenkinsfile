@@ -5,7 +5,13 @@ pipeline {
       args '--user root -v /var/run/docker.sock:/var/run/docker.sock' // mount Docker socket to access the host's Docker daemon
     }
   }
-  
+  stages {
+    stage('Checkout') {
+      steps {
+        sh 'echo passed'
+        //git branch: 'main', url: 'https://github.com/Saikrishna1912/Jenkins-CICD.git'
+      }
+    }
   stages {
     stage('Build and Test') {
       steps {
@@ -21,18 +27,6 @@ pipeline {
       steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
           sh 'cd java-maven-sonar-argocd-helm-k8s/spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
-        }
-      }
-    }
-    stage('Cleanup Docker Resources') {
-      steps {
-        script {
-          sh '''
-            docker container prune -f
-            docker image prune -a -f
-            docker volume prune -f
-            docker network prune -f
-          '''
         }
       }
     }
@@ -58,7 +52,7 @@ pipeline {
         GIT_USER_NAME = "Saikrishna1912"
       }
       steps {
-        withCredentials([string(credentialsId: 'git_credentials', variable: 'GITHUB_TOKEN')]) {
+        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
           sh '''
             git config user.email "saikrishna.galipelly@gmail.com"
             git config user.name "saikrishna"
